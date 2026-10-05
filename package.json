@@ -1,0 +1,10 @@
+{
+  "name": "weather-home-navigator",
+  "version": "1.0.0",
+  "description": "Eine Web-App zum Anzeigen des aktuellen Wetters und Navigation nach Hause mit Google Maps",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "check": "node --check script.js"
+  },
+  "private": true
+}
