@@ -17,10 +17,23 @@ Optional mit installiertem Node.js/npm: `npm start` startet denselben Server,
 
 ## Auf dem iPhone verwenden
 
-Veröffentliche `index.html`, `style.css` und `script.js` bei einem statischen
-HTTPS-Host, beispielsweise GitHub Pages (Repository-Einstellungen → Pages →
-Deploy from a branch → den Branch mit der App und `/ (root)` auswählen).
-Öffne die bereitgestellte HTTPS-Adresse in Safari und erlaube den Standortzugriff.
+Für dieses Repository muss GitHub Pages einmalig in den Repository-Einstellungen
+aktiviert werden; ein Merge allein aktiviert Pages nicht:
+
+1. Öffne <https://github.com/andreasglas/weather-home-navigator/settings/pages>
+   in Safari (nicht in der GitHub-App) und melde dich mit einem Konto mit
+   Administratorrechten für das Repository an.
+2. Wähle unter **Build and deployment → Source** die Option **Deploy from a branch**.
+3. Wähle den Branch **main** und den Ordner **/ (root)** und klicke auf **Save**.
+
+Nach dem Merge dieser Änderungen in `main` und erfolgreicher Pages-Veröffentlichung
+ist die App unter <https://andreasglas.github.io/weather-home-navigator/> erreichbar.
+Die Veröffentlichung kann einige Minuten dauern; ihren Status siehst du unter
+**Actions** im Repository. Die Datei `.nojekyll` im Repository-Stamm deaktiviert
+die Jekyll-Verarbeitung, sodass die statischen Dateien direkt veröffentlicht werden.
+
+Öffne die Pages-Adresse in Safari und erlaube den Standortzugriff.
+Die Raw-Dateiansicht auf GitHub zeigt nur Quelltext und startet die App nicht.
 Über **Teilen → Zum Home-Bildschirm** kannst du einen Schnellzugriff hinzufügen.
 
 Die Standortabfrage funktioniert nur über **HTTPS** oder auf **localhost**.
