@@ -72,8 +72,11 @@ iPhone nicht. Die App benötigt Internetzugriff und ist keine native iOS-/Offlin
   Datenzeitpunkt des Anbieters; Rate-Limits oder Netzfehler werden sichtbar gemeldet.
 - Heizöl: Unter **Heizöl-Datenquelle einrichten** einen eigenen kostenlosen
   [EIA API-Schlüssel](https://www.eia.gov/opendata/register.php) hinterlegen.
-  Der Schlüssel ist nicht im Code enthalten. Ein leeres Feld mit anschließendem
-  Speichern entfernt ihn.
+  Der Schlüssel ist nicht im Code enthalten und wird aus Sicherheitsgründen
+  **nicht in localStorage** gespeichert. Nach jedem Neuladen erneut eingeben;
+  er bleibt nur im Arbeitsspeicher der aktuellen Sitzung.
+  Ein leeres Feld mit anschließendem Klick auf **Für diese Sitzung verwenden / leeren**
+  entfernt ihn aus der Sitzung.
   Verwendet wird die EIA-Reihe `W_EPD2F_PRS_NUS_DPG` über
   `https://api.eia.gov/v2/petroleum/pri/wfr/data/`: **US-Durchschnitt des
   Heizöl-Haushaltspreises in USD pro US-Gallone**, wöchentlich und saisonal
@@ -119,7 +122,7 @@ iPhone-14-Ansicht. Safari auf echter Hardware wurde nicht automatisiert getestet
 
 ## Datenschutz
 
-Heimatadresse, Kontostand, Erinnerung und optionaler EIA-Schlüssel werden ausschließlich
+Heimatadresse, Kontostand und Erinnerung werden ausschließlich
 und **unverschlüsselt** im `localStorage` dieses Browsers gespeichert. Kein Upload
 dieser Daten an ein eigenes Backend, keine Synchronisation zwischen Geräten.
 Andere Nutzer desselben Browserprofils sowie andere Seiten derselben Origin können

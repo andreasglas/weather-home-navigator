@@ -58,11 +58,11 @@
         </div>
         <details>
           <summary>Heizöl-Datenquelle einrichten</summary>
-          <p class="muted">Kostenlosen API-Schlüssel bei <a href="https://www.eia.gov/opendata/register.php" target="_blank" rel="noopener noreferrer">EIA</a> anfordern. Er wird nur lokal gespeichert und ausschließlich an EIA gesendet.</p>
+          <p class="muted">Kostenlosen API-Schlüssel bei <a href="https://www.eia.gov/opendata/register.php" target="_blank" rel="noopener noreferrer">EIA</a> anfordern. Er bleibt nur im Arbeitsspeicher dieser Sitzung und wird ausschließlich an EIA gesendet.</p>
           <form id="oil-form">
             <label for="oil-api-key">Dein EIA API-Schlüssel</label>
             <input id="oil-api-key" type="password" autocomplete="off" spellcheck="false" maxlength="100">
-            <button class="secondary save-button" type="submit">Speichern / leeren und laden</button>
+            <button class="secondary save-button" type="submit">Für diese Sitzung verwenden / leeren</button>
           </form>
           <p id="oil-settings-status" role="status"></p>
         </details>

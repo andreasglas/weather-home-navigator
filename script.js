@@ -246,7 +246,7 @@ async function loadOil() {
   status.classList.remove("error");
   price.textContent = "—";
   if (!oilApiKey) {
-    status.textContent = "Zum Laden bitte deinen EIA API-Schlüssel hinterlegen.";
+    status.textContent = "Zum Laden bitte deinen EIA API-Schlüssel für diese Sitzung eingeben.";
     return;
   }
   status.textContent = "Preis wird geladen …";
@@ -282,14 +282,13 @@ async function loadPrices() {
   pricesButton.disabled = false;
 }
 
-oilApiKey = readLocal("eia-key") || "";
-keyInput.value = oilApiKey;
 document.getElementById("oil-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   if (pricesButton.disabled) return;
   oilApiKey = keyInput.value.trim();
-  saveLocal("eia-key", oilApiKey || null, document.getElementById("oil-settings-status"),
-    oilApiKey ? "API-Schlüssel lokal gespeichert." : "API-Schlüssel entfernt.");
+  document.getElementById("oil-settings-status").textContent = oilApiKey
+    ? "API-Schlüssel nur für diese Sitzung gesetzt. Nach Neuladen erneut eingeben."
+    : "API-Schlüssel aus der Sitzung entfernt.";
   await loadPrices();
 });
 pricesButton.addEventListener("click", loadPrices);
