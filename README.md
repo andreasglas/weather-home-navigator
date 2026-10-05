@@ -42,8 +42,10 @@ iPhone nicht. Die App benötigt Internetzugriff und ist keine native iOS-/Offlin
 
 ## Datenschutz
 
-Die Heimatadresse wird ausschließlich im `localStorage` dieses Browsers gespeichert
-und erst beim Navigieren an Google Maps übergeben. Gelöschte Website-Daten löschen
+Die Heimatadresse wird ausschließlich und **unverschlüsselt** im `localStorage`
+dieses Browsers gespeichert und erst beim Navigieren an Google Maps übergeben.
+Andere Nutzer desselben Browserprofils können die Adresse einsehen; verwende die
+Speicherfunktion daher nur auf deinem eigenen Gerät. Gelöschte Website-Daten löschen
 auch die Adresse. Ist der Speicher gesperrt, kann die Adresse für die aktuelle Sitzung
 verwendet werden, bleibt aber nach dem Neuladen nicht erhalten.
 
