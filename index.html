@@ -58,7 +58,7 @@
         </div>
         <details>
           <summary>Heizöl-Datenquelle einrichten</summary>
-          <p class="muted">Kostenlosen API-Schlüssel bei <a href="https://www.eia.gov/opendata/register.php" target="_blank" rel="noopener noreferrer">EIA</a> anfordern. Er bleibt nur im Arbeitsspeicher dieser Sitzung und wird ausschließlich an EIA gesendet.</p>
+          <p class="muted">Kostenlosen API-Schlüssel bei <a href="https://www.eia.gov/opendata/register.php" target="_blank" rel="noopener noreferrer">EIA</a> anfordern. Er bleibt nur im Arbeitsspeicher und wird nicht gespeichert.</p>
           <form id="oil-form">
             <label for="oil-api-key">Dein EIA API-Schlüssel</label>
             <input id="oil-api-key" type="password" autocomplete="off" spellcheck="false" maxlength="100">
@@ -108,7 +108,7 @@
 
       <section class="card" aria-labelledby="reminder-heading">
         <h2 id="reminder-heading">Erinnerung</h2>
-        <p class="muted">Eine einmalige Erinnerung, z. B. für die Abfahrt. Das Dashboard muss geöffnet bleiben. Auf dem iPhone werden Erinnerungen hier in der App angezeigt, nicht als Hintergrund-Push.</p>
+        <p class="muted">Eine einmalige Erinnerung, z. B. für die Abfahrt. Das Dashboard muss geöffnet bleiben. Auf dem iPhone werden Erinnerungen hier in der App angezeigt, nicht als Hintergrund-Benachrichtigungen.</p>
         <button id="enable-notifications" class="secondary save-button" type="button">Browser-Benachrichtigungen erlauben</button>
         <p id="notification-status" role="status"></p>
         <form id="reminder-form">
