@@ -157,6 +157,7 @@ const balanceInput = document.getElementById("account-balance");
 const balanceStatus = document.getElementById("balance-status");
 const keyInput = document.getElementById("oil-api-key");
 const pricesButton = document.getElementById("refresh-prices");
+const oilSaveButton = document.querySelector("#oil-form button");
 const reminderStatus = document.getElementById("reminder-status");
 const reminderMessage = document.getElementById("reminder-message");
 const reminderTime = document.getElementById("reminder-time");
@@ -278,8 +279,12 @@ async function loadOil() {
 
 async function loadPrices() {
   pricesButton.disabled = true;
+  keyInput.disabled = true;
+  oilSaveButton.disabled = true;
   await Promise.all([loadBitcoin(), loadOil()]);
   pricesButton.disabled = false;
+  keyInput.disabled = false;
+  oilSaveButton.disabled = false;
 }
 
 document.getElementById("oil-form").addEventListener("submit", async (event) => {
