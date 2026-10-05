@@ -94,8 +94,7 @@ function loadWeather() {
   }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
 }
 
-function setHomeAddress(address) {
-  addressInput.value = address;
+function navigationUrl(address) {
   const url = new URL("https://www.google.com/maps/dir/");
   url.search = new URLSearchParams({
     api: "1",
@@ -103,7 +102,12 @@ function setHomeAddress(address) {
     travelmode: "driving",
     dir_action: "navigate"
   }).toString();
-  navigationLink.href = url.toString();
+  return url.toString();
+}
+
+function setHomeAddress(address) {
+  addressInput.value = address;
+  navigationLink.href = navigationUrl(address);
   navigationLink.classList.remove("disabled");
   navigationLink.removeAttribute("aria-disabled");
 }
@@ -130,6 +134,7 @@ addressInput.addEventListener("input", () => addressInput.setCustomValidity(""))
 navigationLink.addEventListener("click", (event) => {
   if (navigationLink.getAttribute("aria-disabled") === "true") {
     event.preventDefault();
+    addressInput.closest("details").open = true;
     addressInput.focus();
   }
 });
@@ -145,4 +150,232 @@ try {
   homeStatus.textContent = "Lokaler Speicher ist nicht verfügbar. Du kannst die Adresse für diese Sitzung eingeben.";
 }
 
+document.getElementById("navigate-work").href = navigationUrl("FIZ München, Knorrstraße 147, München");
+
+const currencyFormat = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" });
+const balanceInput = document.getElementById("account-balance");
+const balanceStatus = document.getElementById("balance-status");
+const keyInput = document.getElementById("oil-api-key");
+const pricesButton = document.getElementById("refresh-prices");
+const reminderStatus = document.getElementById("reminder-status");
+const reminderMessage = document.getElementById("reminder-message");
+const reminderTime = document.getElementById("reminder-time");
+const notificationStatus = document.getElementById("notification-status");
+const prefix = "weather-home-navigator.";
+let oilApiKey = "";
+let reminder = null;
+
+function readLocal(key) {
+  try {
+    return localStorage.getItem(prefix + key);
+  } catch {
+    return null;
+  }
+}
+
+function saveLocal(key, value, status, message) {
+  try {
+    if (value === null) localStorage.removeItem(prefix + key);
+    else localStorage.setItem(prefix + key, value);
+    status.textContent = message;
+  } catch {
+    status.textContent = "Speichern nicht möglich: Änderung gilt nur für diese Sitzung.";
+  }
+}
+
+function parseBalance(value) {
+  const text = value.trim();
+  if (!/^-?\d{1,12}([.,]\d{1,2})?$/.test(text)) return null;
+  const amount = Number(text.replace(",", "."));
+  return Number.isFinite(amount) ? amount : null;
+}
+
+document.getElementById("balance-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const amount = parseBalance(balanceInput.value);
+  if (amount === null) {
+    balanceInput.setCustomValidity("Bitte einen Betrag ohne Tausendertrennzeichen mit höchstens zwei Nachkommastellen eingeben.");
+    balanceInput.reportValidity();
+    return;
+  }
+  document.getElementById("balance-display").textContent = currencyFormat.format(amount);
+  saveLocal("balance", String(amount), balanceStatus, "Kontostand lokal gespeichert. Jederzeit editierbar.");
+});
+balanceInput.addEventListener("input", () => balanceInput.setCustomValidity(""));
+const savedBalance = readLocal("balance");
+if (savedBalance !== null && parseBalance(savedBalance) !== null) {
+  balanceInput.value = savedBalance.replace(".", ",");
+  document.getElementById("balance-display").textContent = currencyFormat.format(parseBalance(savedBalance));
+}
+
+async function fetchJson(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { signal: controller.signal, credentials: "omit", referrerPolicy: "no-referrer" });
+    if (!response.ok) throw new Error("API request failed");
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function loadBitcoin() {
+  const status = document.getElementById("bitcoin-status");
+  const price = document.getElementById("bitcoin-price");
+  status.textContent = "Kurs wird geladen …";
+  status.classList.remove("error");
+  price.textContent = "—";
+  try {
+    const data = await fetchJson("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur&include_last_updated_at=true");
+    if (!Number.isFinite(data.bitcoin?.eur) || data.bitcoin.eur <= 0 ||
+        !Number.isFinite(data.bitcoin.last_updated_at) || data.bitcoin.last_updated_at <= 0) {
+      throw new Error("Invalid Bitcoin price");
+    }
+    price.textContent = currencyFormat.format(data.bitcoin.eur);
+    status.textContent = `Stand: ${new Date(data.bitcoin.last_updated_at * 1000).toLocaleString("de-DE")}`;
+  } catch {
+    status.textContent = "Kurs nicht verfügbar. Bitte später aktualisieren (Internet/API-Limit).";
+    status.classList.add("error");
+  }
+}
+
+async function loadOil() {
+  const status = document.getElementById("oil-status");
+  const price = document.getElementById("oil-price");
+  status.classList.remove("error");
+  price.textContent = "—";
+  if (!oilApiKey) {
+    status.textContent = "Zum Laden bitte deinen EIA API-Schlüssel hinterlegen.";
+    return;
+  }
+  status.textContent = "Preis wird geladen …";
+  const url = new URL("https://api.eia.gov/v2/petroleum/pri/wfr/data/");
+  url.search = new URLSearchParams({
+    api_key: oilApiKey,
+    frequency: "weekly",
+    "data[0]": "value",
+    "facets[product][]": "EPD2F",
+    "facets[process][]": "PRS",
+    "facets[duoarea][]": "NUS",
+    "sort[0][column]": "period",
+    "sort[0][direction]": "desc",
+    length: "1"
+  }).toString();
+  try {
+    const data = await fetchJson(url);
+    const row = data.response?.data?.[0];
+    const value = Number(row?.value);
+    if (!row || row.value === null || row.value === "" || !Number.isFinite(value) || value <= 0 ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(row.period)) throw new Error("Invalid heating oil price");
+    price.textContent = `${new Intl.NumberFormat("de-DE", { minimumFractionDigits: 3, maximumFractionDigits: 3 }).format(value)} $/gal`;
+    status.textContent = `Stand: ${row.period} · US-Durchschnitt`;
+  } catch {
+    status.textContent = "Heizölpreis nicht verfügbar. API-Schlüssel und Verbindung prüfen.";
+    status.classList.add("error");
+  }
+}
+
+async function loadPrices() {
+  pricesButton.disabled = true;
+  await Promise.all([loadBitcoin(), loadOil()]);
+  pricesButton.disabled = false;
+}
+
+oilApiKey = readLocal("eia-key") || "";
+keyInput.value = oilApiKey;
+document.getElementById("oil-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (pricesButton.disabled) return;
+  oilApiKey = keyInput.value.trim();
+  saveLocal("eia-key", oilApiKey || null, document.getElementById("oil-settings-status"),
+    oilApiKey ? "API-Schlüssel lokal gespeichert." : "API-Schlüssel entfernt.");
+  await loadPrices();
+});
+pricesButton.addEventListener("click", loadPrices);
+
+function describeReminder() {
+  reminderStatus.textContent = reminder
+    ? `${reminder.message} · ${new Date(reminder.at).toLocaleString("de-DE")}`
+    : "Keine Erinnerung geplant.";
+}
+
+function checkReminder() {
+  if (!reminder || Date.now() < reminder.at) return;
+  const message = reminder.message;
+  reminder = null;
+  const alert = document.getElementById("reminder-alert");
+  alert.textContent = `Erinnerung: ${message}`;
+  alert.hidden = false;
+  saveLocal("reminder", null, reminderStatus, "Erinnerung ausgelöst.");
+  if ("Notification" in window && Notification.permission === "granted") {
+    try {
+      new Notification("Mein Dashboard", { body: message });
+    } catch {
+      notificationStatus.textContent = "Systembenachrichtigungen sind hier nicht verfügbar. Die Erinnerung steht im Dashboard.";
+    }
+  }
+}
+
+document.getElementById("reminder-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const at = new Date(reminderTime.value).getTime();
+  const message = reminderMessage.value.trim();
+  if (!message || !Number.isFinite(at) || at <= Date.now()) {
+    reminderStatus.textContent = "Bitte eine Nachricht und einen Zeitpunkt in der Zukunft eingeben.";
+    return;
+  }
+  reminder = { message, at };
+  document.getElementById("reminder-alert").hidden = true;
+  describeReminder();
+  saveLocal("reminder", JSON.stringify(reminder), reminderStatus, reminderStatus.textContent);
+});
+document.getElementById("cancel-reminder").addEventListener("click", () => {
+  reminder = null;
+  reminderMessage.value = "";
+  reminderTime.value = "";
+  document.getElementById("reminder-alert").hidden = true;
+  saveLocal("reminder", null, reminderStatus, "Erinnerung gelöscht.");
+});
+try {
+  const saved = JSON.parse(readLocal("reminder"));
+  if (saved && typeof saved.message === "string" && saved.message.trim() &&
+      saved.message.length <= 150 && Number.isFinite(saved.at) && saved.at > 0) {
+    reminder = saved;
+    reminderMessage.value = saved.message;
+    const localDate = new Date(saved.at);
+    if (!Number.isFinite(localDate.getTime())) throw new Error("Invalid reminder date");
+    localDate.setMinutes(localDate.getMinutes() - localDate.getTimezoneOffset());
+    reminderTime.value = localDate.toISOString().slice(0, 16);
+    describeReminder();
+  }
+} catch {
+  reminder = null;
+  reminderStatus.textContent = "Gespeicherte Erinnerung ungültig. Bitte neu einrichten.";
+}
+
+const notificationsButton = document.getElementById("enable-notifications");
+if (!("Notification" in window) || !window.isSecureContext) {
+  notificationsButton.disabled = true;
+  notificationStatus.textContent = "Keine Systembenachrichtigungen verfügbar. Erinnerungen erscheinen im geöffneten Dashboard.";
+} else {
+  notificationStatus.textContent = `Browser-Erlaubnis: ${Notification.permission}. Erinnerungen benötigen ein geöffnetes Dashboard.`;
+}
+notificationsButton.addEventListener("click", async () => {
+  try {
+    const permission = await Notification.requestPermission();
+    notificationStatus.textContent = permission === "granted"
+      ? "Benachrichtigungen erlaubt. Das Dashboard muss geöffnet bleiben."
+      : "Keine Erlaubnis. Erinnerungen erscheinen weiterhin im Dashboard.";
+  } catch {
+    notificationStatus.textContent = "Nicht unterstützt. Erinnerungen erscheinen im Dashboard.";
+  }
+});
+
+setInterval(checkReminder, 1000);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) checkReminder();
+});
+checkReminder();
 loadWeather();
+loadPrices();

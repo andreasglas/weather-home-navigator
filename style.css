@@ -79,6 +79,19 @@ input::placeholder { color: #607185; }
 :focus-visible { outline: 3px solid #b34c00; outline-offset: 4px; }
 .error { color: #a32121; }
 #home-status, #weather-status { overflow-wrap: anywhere; }
+.navigation-actions { display: grid; gap: 12px; margin-top: 20px; }
+.market-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 20px 0; }
+.widget { background: #f0f5fb; border-radius: 14px; padding: 16px; overflow-wrap: anywhere; }
+h3 { font-size: 1rem; margin: 0; }
+.price { font-size: clamp(1.3rem, 5vw, 1.8rem); font-weight: 700; letter-spacing: -0.03em; }
+details { margin-top: 16px; }
+summary { cursor: pointer; min-height: 44px; padding: 10px 0; color: #174ea6; }
+#reminder-alert { padding: 16px; border: 2px solid #1754b8; border-radius: 12px; overflow-wrap: anywhere; }
+input { min-width: 0; font-size: 16px; }
+
+@media (max-width: 430px) {
+  .market-grid { grid-template-columns: 1fr; }
+}
 
 @media (max-width: 360px) {
   .card { padding: 18px; }
