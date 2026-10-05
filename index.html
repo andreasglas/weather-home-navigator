@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#eff5fb">
-    <meta name="description" content="Das Wetter an deinem Standort und mit einem Klick nach Hause navigieren.">
-    <title>Wetter &amp; Heimweg</title>
+    <meta name="description" content="Dein persönliches Dashboard für Navigation, Wetter, Finanzen und Erinnerungen.">
+    <title>Mein Dashboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
   </head>
@@ -13,9 +13,69 @@
     <main>
       <header>
         <p class="eyebrow">DEIN ALLTAG, EIN BISSCHEN EINFACHER</p>
-        <h1>Wetter &amp; Heimweg</h1>
-        <p>Gut vorbereitet. Sicher nach Hause.</p>
+        <h1>Mein Dashboard</h1>
+        <p>Deine Wege. Dein Überblick. Deine Zeit.</p>
       </header>
+
+      <section class="card" aria-labelledby="navigation-heading">
+        <h2 id="navigation-heading">Direkt losfahren</h2>
+        <div class="navigation-actions">
+          <a id="navigate-work" class="primary" target="_blank" rel="noopener noreferrer">Zur Arbeit navigieren</a>
+          <a id="navigate-home" class="primary disabled" aria-disabled="true" target="_blank" rel="noopener noreferrer">Nach Hause navigieren</a>
+        </div>
+        <p class="muted">Arbeit: FIZ München, Knorrstraße 147, München.</p>
+        <details>
+          <summary>Heimatadresse einrichten / ändern</summary>
+          <form id="home-form">
+            <label for="home-address">Heimatadresse</label>
+            <input id="home-address" name="address" type="text" autocomplete="street-address"
+                   placeholder="Straße, Hausnummer, PLZ und Ort" maxlength="500" required>
+            <button class="secondary save-button" type="submit">Adresse speichern</button>
+          </form>
+        </details>
+        <p id="home-status" role="status">Bitte richte deine Heimatadresse einmalig ein.</p>
+        <p class="muted">Öffnet Google Maps. Persönliche Adressen werden nur lokal gespeichert.</p>
+      </section>
+
+      <section class="card" aria-labelledby="finance-heading">
+        <div class="section-header">
+          <h2 id="finance-heading">Finanzen</h2>
+          <button id="refresh-prices" class="secondary" type="button">Kurse aktualisieren</button>
+        </div>
+        <div class="market-grid">
+          <div class="widget">
+            <h3>Bitcoin</h3>
+            <p id="bitcoin-price" class="price">—</p>
+            <p id="bitcoin-status" class="muted" role="status">Kurs wird geladen …</p>
+            <p class="muted">BTC/EUR · CoinGecko</p>
+          </div>
+          <div class="widget">
+            <h3>Heizöl</h3>
+            <p id="oil-price" class="price">—</p>
+            <p id="oil-status" class="muted" role="status"></p>
+            <p class="muted">US-Haushaltspreis · USD/US-Gallone · EIA, wöchentlich (saisonal). Kein deutscher Lieferpreis.</p>
+          </div>
+        </div>
+        <details>
+          <summary>Heizöl-Datenquelle einrichten</summary>
+          <p class="muted">Kostenlosen API-Schlüssel bei <a href="https://www.eia.gov/opendata/register.php" target="_blank" rel="noopener noreferrer">EIA</a> anfordern. Er bleibt nur im Arbeitsspeicher dieser Sitzung und wird ausschließlich an EIA gesendet.</p>
+          <form id="oil-form">
+            <label for="oil-api-key">Dein EIA API-Schlüssel</label>
+            <input id="oil-api-key" type="password" autocomplete="off" spellcheck="false" maxlength="100">
+            <button class="secondary save-button" type="submit">Für diese Sitzung verwenden / leeren</button>
+          </form>
+          <p id="oil-settings-status" role="status"></p>
+        </details>
+        <form id="balance-form">
+          <label for="account-balance">Girokontostand (EUR)</label>
+          <input id="account-balance" type="text" inputmode="decimal" autocomplete="off"
+                 placeholder="z. B. 1250,50" maxlength="18" aria-describedby="balance-help" required>
+          <p id="balance-help" class="muted">Manuelle Eingabe, ohne Tausendertrennzeichen. Keine Verbindung zu deiner Bank oder Trade Republic.</p>
+          <button class="secondary save-button" type="submit">Kontostand speichern</button>
+        </form>
+        <p id="balance-display" class="price">—</p>
+        <p id="balance-status" role="status">Nur auf diesem Gerät gespeichert.</p>
+      </section>
 
       <section class="card" aria-labelledby="weather-heading">
         <div class="section-header">
@@ -46,23 +106,26 @@
         <p class="muted">Wetterdaten von <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>.</p>
       </section>
 
-      <section class="card" aria-labelledby="home-heading">
-        <h2 id="home-heading">Dein Heimweg</h2>
-        <p>Speichere deine Heimatadresse und starte direkt die Navigation.</p>
-        <form id="home-form">
-          <label for="home-address">Heimatadresse</label>
-          <input id="home-address" name="address" type="text" autocomplete="street-address"
-                 placeholder="Straße, Hausnummer, PLZ und Ort" maxlength="500" required>
-          <button class="secondary save-button" type="submit">Adresse speichern</button>
+      <section class="card" aria-labelledby="reminder-heading">
+        <h2 id="reminder-heading">Erinnerung</h2>
+        <p class="muted">Eine einmalige Erinnerung, z. B. für die Abfahrt. Das Dashboard muss geöffnet bleiben. Auf dem iPhone werden Erinnerungen hier in der App angezeigt, nicht als Hintergrund-Push.</p>
+        <button id="enable-notifications" class="secondary save-button" type="button">Browser-Benachrichtigungen erlauben</button>
+        <p id="notification-status" role="status"></p>
+        <form id="reminder-form">
+          <label for="reminder-message">Nachricht</label>
+          <input id="reminder-message" type="text" maxlength="150" placeholder="Zeit, zur Arbeit zu fahren!" required>
+          <label for="reminder-time">Datum und Uhrzeit</label>
+          <input id="reminder-time" type="datetime-local" required>
+          <button class="secondary save-button" type="submit">Erinnerung speichern</button>
+          <button id="cancel-reminder" class="secondary save-button" type="button">Erinnerung löschen</button>
         </form>
-        <p id="home-status" role="status"></p>
-        <a id="navigate-home" class="primary disabled" aria-disabled="true">
-          <span aria-hidden="true">⌂</span> Nach Hause navigieren
-        </a>
-        <p class="muted">Öffnet Google Maps. Deine Adresse bleibt in diesem Browser gespeichert.</p>
+        <p id="reminder-status" role="status">Keine Erinnerung geplant.</p>
+        <p id="reminder-alert" role="alert" hidden></p>
       </section>
-      <footer>Für das Wetter wird dein Standort an Open-Meteo übermittelt.
-        Bei der Navigation erhält Google Maps deine Heimatadresse.</footer>
+      <footer>Kontostand, Einstellungen und Erinnerungen bleiben lokal, unverschlüsselt in diesem Browser.
+        Wetter: Standort an Open-Meteo. Kurse: CoinGecko und optional EIA.
+        Navigation: Zieladresse an Google Maps. Keine Bankanmeldung, kein Tracking.
+        Ein privates Repository schützt nicht automatisch die veröffentlichte Website.</footer>
     </main>
   </body>
 </html>
